@@ -28,8 +28,11 @@
     "windows": [
       {
         "title": "追剧",
-        "width": 800,
-        "height": 600
+        "width": 1024,
+        "height": 768,
+        "fullscreen": false,
+        "decorations": true,
+        "center": true
       }
     ],
     "security": {

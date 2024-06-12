@@ -1,57 +1,104 @@
 <template>
-  <div id="player"></div>
-  <Button @click="goToTest">Button</Button>
+  <van-sticky>
+    <div class="container mx-auto p-4">
+      <div class="flex flex-col space-y-4">
+        <!-- 第一行显示 firstLevel -->
+        <div class="flex space-x-4 overflow-x-auto">
+          <div v-for="(item, index) in firstLevelItems" :key="index" :class="{ 'bg-blue-500 text-white': selectedFirstLevel === index, 'bg-gray-200': selectedFirstLevel !== index }" class="cursor-pointer p-2 rounded inline-block whitespace-nowrap transition duration-200 ease-in-out transform hover:bg-blue-400 hover:text-white hover:shadow-md" @click="selectFirstLevel(index, item.id)">
+            {{ item.name }}
+          </div>
+        </div>
+        <!-- 第二行显示 secondLevel -->
+        <div class="flex space-x-4 overflow-x-auto">
+          <div v-for="(item, index) in secondLevelItems" :key="index" :class="{ 'bg-purple-500 text-white': selectedSecondLevel === index, 'bg-gray-200': selectedSecondLevel !== index }" class="cursor-pointer p-2 rounded inline-block whitespace-nowrap transition duration-200 ease-in-out transform hover:bg-purple-400 hover:text-white hover:shadow-md" @click="selectSecondLevel(index, item.id)">
+            {{ item.name }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </van-sticky>
+
+  <!-- 电影列表 -->
+  <div class="container mx-auto p-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div v-for="(item, index) in videoList" :key="index" class="bg-white shadow-md rounded-lg overflow-hidden" @click="goToDetail(item)">
+        <img v-if="item.cover" :src="item.cover" alt="" class="w-full h-48 object-cover" />
+        <div class="p-4">
+          <div class="text-xl font-bold">{{ item.name }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 分页 -->
+  <van-sticky position="bottom">
+    <div class="container mx-auto p-4">
+      <MyPagination :total="totalPages" v-model:page="page" @update:page="getVideoList" />
+    </div>
+  </van-sticky>
+
+  <van-back-top bottom="60" right="15" />
 </template>
+
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-import { appWindow } from '@tauri-apps/api/window'
-import { getCategory } from '@/api/category'
-import { Button } from '@/components/ui/button'
+import { onMounted, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { getCategory } from '@/api/category'
+import { getList, getCover } from '@/api/video'
+import MyPagination from '@/components/MyPagination.vue'
 
+// invoke('greet', { name: 'ning' }).then((res) => {
+//   console.log(res)
+// })
 const router = useRouter()
-function goToTest() {
-  router.push('/test')
-}
 
-// 切换全屏模式
-const toggleFullscreen = async () => {
-  const isFullscreen = await appWindow.isFullscreen()
-  await appWindow.setFullscreen(!isFullscreen)
-}
+const firstLevelItems = ref([])
+const selectedFirstLevel = ref(0)
+const selectedSecondLevel = ref('')
+let categoryId = ''
+const videoList = ref([])
+const page = ref(1)
+const totalPages = ref(0)
 
-let player = null
-
-const initPlayer = async () => {
-  player = polyvPlayer({
-    wrap: '#player',
-    width: document.body.clientWidth,
-    height: (document.body.clientWidth * 9) / 16,
-    url: 'https://vip.ffzy-play2.com/20240604/60153_449c866d/index.m3u8',
-    autoplay: false,
-    forceH5: true,
-    // 播放倍速，最小0.5，最大3
-    speed: [0.5, 1, 1.5, 2, 2.5, 3],
-    df: 1,
-    hideSwitchPlayer: true,
-    // toggleFullPageScreen: true,
-  })
-
-  // 全屏切换事件
-  player.on('s2j_onFullScreen', async () => {
-    await toggleFullscreen()
-  })
-
-  player.on('s2j_onNormalScreen', async () => {
-    await toggleFullscreen()
-  })
-}
 onMounted(async () => {
-  await initPlayer()
-  const res = await getCategory()
-  console.log(res)
+  firstLevelItems.value = await getCategory()
+  // 将第一个分类的 id 赋值给 categoryId
+  categoryId = firstLevelItems.value[0].id
+  getVideoList()
 })
 
-onUnmounted(() => {})
+const getVideoList = async () => {
+  // 获取视频列表
+  const res = await getList(categoryId, page.value)
+  videoList.value = res.movies
+  totalPages.value = res.totalPages
+  // 获取每个电影的封面
+  videoList.value.forEach(async (item) => {
+    item.cover = await getCover(item.url)
+  })
+  // 跳转到页面顶部
+  window.scrollTo(0, 0)
+}
+
+const secondLevelItems = computed(() => {
+  return firstLevelItems.value[selectedFirstLevel.value]?.children || []
+})
+
+const selectFirstLevel = (index, id) => {
+  selectedFirstLevel.value = index
+  selectedSecondLevel.value = ''
+  categoryId = id
+  getVideoList()
+}
+
+const selectSecondLevel = (index, id) => {
+  selectedSecondLevel.value = index
+  categoryId = id
+  getVideoList()
+}
+
+const goToDetail = (item) => {
+  console.log(item)
+  router.push({ path: '/detail', query: { id: item.id } })
+}
 </script>
-<style lang="less"></style>

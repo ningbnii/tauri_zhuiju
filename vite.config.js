@@ -4,6 +4,9 @@ import path from 'path'
 import tailwind from 'tailwindcss'
 import autoprefixer from 'autoprefixer'
 import legacy from '@vitejs/plugin-legacy'
+import AutoImport from 'unplugin-auto-import/vite'
+import Components from 'unplugin-vue-components/vite'
+import { VantResolver } from '@vant/auto-import-resolver'
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
@@ -20,6 +23,12 @@ export default defineConfig(async () => ({
   },
   plugins: [
     vue(),
+    AutoImport({
+      resolvers: [VantResolver()],
+    }),
+    Components({
+      resolvers: [VantResolver()],
+    }),
     // legacy({
     //   polyfills: ['es.promise.finally', 'es/map', 'es/set'],
     //   targets: ['defaults', 'not IE 11'],
