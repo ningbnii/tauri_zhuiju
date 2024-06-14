@@ -1,57 +1,62 @@
-// Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::process::{Command, Stdio};
-use std::fs::File;
-use std::io::Write;
-use std::os::windows::process::CommandExt;
-use std::sync::{Arc, Mutex};
+use hyper::{Body, Client, Uri};
+use std::convert::Infallible;
+use warp::Filter;
+use warp::http::Response;
+use std::str::FromStr;
+use warp::http::Method;
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
-fn main() {
-    let external_process = Arc::new(Mutex::new(None));
+async fn fetch_and_forward(url: String) -> Result<impl warp::Reply, Infallible> {
+    let client = Client::new();
+    match client.get(Uri::from_str(&url).unwrap()).await {
+        Ok(res) => {
+            let body_bytes = hyper::body::to_bytes(res.into_body()).await.unwrap_or_default();
+            // 明确指定Response的类型为Response<Body>
+            Ok(Response::new(Body::from(body_bytes)))
+        },
+        Err(e) => {
+            eprintln!("Error fetching URL: {}", e);
+            // 同样，确保错误响应也使用Response<Body>
+            Ok(Response::builder().status(500).body(Body::from("Failed to fetch URL")).unwrap())
+        }
+    }
+}
+
+fn setup_routes() -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
+    let cors = warp::cors()
+        .allow_any_origin()
+        .allow_headers(vec!["Origin", "X-Requested-With", "Content-Type", "Accept"])
+        .allow_methods(vec![Method::GET, Method::POST]); // 根据需要调整允许的方法
+
+    warp::path("getHtmlFromUrl")
+        .and(warp::query::<std::collections::HashMap<String, String>>())
+        .and_then(|params: std::collections::HashMap<String, String>| {
+            let url = params.get("url").cloned().unwrap_or_default();
+            fetch_and_forward(url)
+        })
+        .with(cors) // 应用CORS设置
+}
+
+#[tokio::main]
+async fn main() {
+    let routes = setup_routes();
 
     tauri::Builder::default()
-        .setup({
-            let external_process = external_process.clone();
-            move |_app| {
-                let mut file = File::create("log.txt").expect("failed to create log file");
-                writeln!(file, "Starting external service...").expect("failed to write to log file");
+        .setup(move |_app| {
+            let routes = routes.clone();
+            tokio::spawn(async move {
+                warp::serve(routes)
+                    .run(([127, 0, 0, 1], 30000))
+                    .await;
+            });
 
-                // 使用 CREATE_NO_WINDOW 标志以静默方式启动外部进程
-                let child = Command::new("binaries/service")
-                    .creation_flags(0x08000000) // CREATE_NO_WINDOW
-                    .stdout(Stdio::null())
-                    .stderr(Stdio::null())
-                    .spawn();
-
-                match child {
-                    Ok(child) => {
-                        writeln!(file, "Service started successfully").expect("failed to write to log file");
-                        *external_process.lock().unwrap() = Some(child);
-                    }
-                    Err(e) => {
-                        writeln!(file, "Failed to start service: {}", e).expect("failed to write to log file");
-                    }
-                }
-
-                Ok(())
-            }
-        })
-        .on_window_event({
-            let external_process = external_process.clone();
-            move |event| {
-                if let tauri::WindowEvent::CloseRequested { .. } = event.event() {
-                    if let Some(child) = external_process.lock().unwrap().as_mut() {
-                        child.kill().expect("failed to kill external process");
-                    }
-                }
-            }
+            Ok(())
         })
         .invoke_handler(tauri::generate_handler![greet])
         .run(tauri::generate_context!())

@@ -7,7 +7,7 @@ import { useToast } from '@/components/ui/toast/use-toast'
 
 const { toast } = useToast()
 // 最大请求次数
-const RETRIES_NUM = 3
+const RETRIES_NUM = 1
 const NETWORK_ERROR = '网络请求异常，请稍后重试'
 
 // 创建axios实例，添加全局配置
@@ -96,40 +96,6 @@ function get(url, params) {
     url,
     method: 'get',
     params,
-  })
-}
-
-function jsonp(url, params, callbackName) {
-  return new Promise((resolve, reject) => {
-    const script = document.createElement('script')
-    const callbackFunctionName = `jsonp_callback_${Date.now()}`
-    params = params || {}
-    params.callback = callbackFunctionName
-
-    const queryString = Object.keys(params)
-      .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
-      .join('&')
-
-    const jsonpUrl = `${url}?${queryString}`
-
-    // 定义全局回调函数
-    window[callbackFunctionName] = (data) => {
-      resolve(data)
-      // 清理脚本和回调函数
-      document.body.removeChild(script)
-      delete window[callbackFunctionName]
-    }
-
-    script.src = jsonpUrl
-    script.onerror = (error) => {
-      reject(error)
-      // 清理脚本和回调函数
-      document.body.removeChild(script)
-      delete window[callbackFunctionName]
-    }
-
-    // 添加脚本到文档中
-    document.body.appendChild(script)
   })
 }
 
