@@ -53,7 +53,7 @@ const initPlayer = async () => {
     width: widthWithoutPadding,
     height: (widthWithoutPadding * 9) / 16,
     url: playUrl,
-    autoplay: false,
+    autoplay: true,
     forceH5: true,
     // 播放倍速，最小0.5，最大3
     speed: [0.5, 1, 1.5, 2, 2.5, 3],
