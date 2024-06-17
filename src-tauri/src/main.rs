@@ -6,11 +6,42 @@ use std::fs::File;
 use std::io::Write;
 use std::os::windows::process::CommandExt;
 use std::sync::{Arc, Mutex};
+use std::env;
+use std::path::PathBuf;
+use cfg_if::cfg_if;
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
+}
+
+
+fn find_service_executable() -> PathBuf {
+    let mut path = env::current_exe().unwrap();
+    path.pop(); // 移除执行文件名称，留下目录路径
+
+    // 根据不同的操作系统选择不同的可执行文件名称
+    cfg_if! {
+        if #[cfg(target_os = "windows")] {
+            let service_name = "service.exe";
+        } else if #[cfg(any(target_os = "macos", target_os = "linux"))] {
+            let service_name = "service";
+        } else {
+            panic!("Unsupported operating system");
+        }
+    }
+
+    // 尝试根目录下的 service
+    if path.join(service_name).exists() {
+        return path.join(service_name);
+    }
+    // 尝试 binaries 目录下的 service
+    else if path.join("binaries").join(service_name).exists() {
+        return path.join("binaries").join(service_name);
+    }
+
+    panic!("{} not found", service_name);
 }
 
 fn main() {
@@ -22,9 +53,12 @@ fn main() {
             move |_app| {
                 let mut file = File::create("log.txt").expect("failed to create log file");
                 writeln!(file, "Starting external service...").expect("failed to write to log file");
+                let service_path = find_service_executable();
+                // println!("Found service at {:?}", service_path);
+                writeln!(file, "Found service at {:?}", service_path).expect("failed to write to log file");
 
                 // 使用 CREATE_NO_WINDOW 标志以静默方式启动外部进程
-                let child = Command::new("binaries/service")
+                let child = Command::new(service_path)
                     .creation_flags(0x08000000) // CREATE_NO_WINDOW
                     .stdout(Stdio::null())
                     .stderr(Stdio::null())
