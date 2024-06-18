@@ -77,3 +77,41 @@ export const getDetail = async (id) => {
 
   return { episodes, name }
 }
+
+/**
+ * 搜索
+ * @param {*} query
+ * @param {*} page
+ * @returns
+ */
+export const searchMoviesByQuery = async (query, page = 1) => {
+  const html = await request.get(`/getHtmlFromUrl?url=http://ffzy5.tv/index.php/vod/search/page/${page}/wd/${query}.html`)
+  const $ = cheerio.load(html)
+  // 获取电影列表
+  const movies = []
+
+  const movieElements = $('.videoContent li').toArray() // 将 jQuery 对象转换为数组
+
+  // 使用 Promise.all 并行处理每个电影详情页的请求
+  await Promise.all(
+    movieElements.map(async (element) => {
+      const name = $(element).find('.videoName').text().trim()
+      const url = $(element).find('.videoName').attr('href')
+      const id = url.split('/').pop().split('.').shift()
+      // 获取影片分类
+      const category = $(element).find('.category').text().trim()
+      // 过滤掉伦理片
+      if (category.includes('伦理')) {
+        return
+      }
+
+      movies.push({ id, name, url })
+    })
+  )
+
+  // 获取页码总数
+  const pageInfoText = $('.pages span.disabled').text()
+  const totalPagesMatch = pageInfoText.match(/当前\d+\/(\d+)页/)
+  const totalPages = totalPagesMatch ? parseInt(totalPagesMatch[1], 10) : 0
+  return { movies, totalPages }
+}
