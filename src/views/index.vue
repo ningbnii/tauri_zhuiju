@@ -51,6 +51,7 @@ import { useRouter } from 'vue-router'
 import { getCategory } from '@/api/category'
 import { getList, getCover, searchMoviesByQuery } from '@/api/video'
 import MyPagination from '@/components/MyPagination.vue'
+import { invoke } from '@tauri-apps/api/tauri'
 
 const router = useRouter()
 
@@ -62,6 +63,9 @@ const videoList = ref([])
 const page = ref(1)
 const totalPages = ref(0)
 const searchQuery = ref('')
+
+// 鼠标一直显示
+invoke('set_cursor_visibility', { visible: true })
 
 onMounted(async () => {
   firstLevelItems.value = await getCategory()

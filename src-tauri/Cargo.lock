@@ -809,17 +809,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "digital"
-version = "0.0.0"
-dependencies = [
- "cfg-if",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
-]
-
-[[package]]
 name = "dirs-next"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5222,6 +5211,18 @@ dependencies = [
  "serde",
  "static_assertions",
  "zvariant",
+]
+
+[[package]]
+name = "zhuiju"
+version = "0.0.0"
+dependencies = [
+ "cfg-if",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "winapi",
 ]
 
 [[package]]

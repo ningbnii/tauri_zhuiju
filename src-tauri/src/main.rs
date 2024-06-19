@@ -9,11 +9,29 @@ use std::sync::{Arc, Mutex};
 use std::env;
 use std::path::PathBuf;
 use cfg_if::cfg_if;
+use winapi::um::winuser::{ShowCursor};
+
+struct AppState {
+    cursor_visible: Mutex<bool>, // 用于存储光标是否可见的状态
+}
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
+}
+
+// set_cursor_visibility 函数用于设置光标的可见性
+#[tauri::command]
+fn set_cursor_visibility(state:tauri::State<AppState>,visible: bool) {
+    let mut cursor_visible = state.cursor_visible.lock().unwrap();
+    if *cursor_visible == visible {
+        return;
+    }
+    unsafe {
+        ShowCursor(visible as i32);
+    }
+    *cursor_visible = visible;
 }
 
 
@@ -48,6 +66,9 @@ fn main() {
     let external_process = Arc::new(Mutex::new(None));
 
     tauri::Builder::default()
+        .manage(AppState {
+            cursor_visible: Mutex::new(true),
+        })
         .setup({
             let external_process = external_process.clone();
             move |_app| {
@@ -87,7 +108,7 @@ fn main() {
                 }
             }
         })
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![greet,set_cursor_visibility])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

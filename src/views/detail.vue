@@ -1,5 +1,5 @@
 <template>
-  <div ref="container" class="container mx-auto p-4">
+  <div ref="container" class="container mx-auto p-4" @mousemove="showCursor" @mousedown="showCursor" @keydown="showCursor">
     <MyBreadCrumb :items="[{ name: videoName }]" />
     <div id="player" class="mt-2"></div>
 
@@ -23,6 +23,7 @@ import { getDetail } from '@/api/video'
 import { Button } from '@/components/ui/button'
 import { useRouter, useRoute } from 'vue-router'
 import MyBreadCrumb from '@/components/MyBreadCrumb.vue'
+import { invoke } from '@tauri-apps/api/tauri'
 
 const router = useRouter()
 const route = useRoute()
@@ -32,11 +33,30 @@ const container = ref(null)
 const videoList = ref([])
 const playIndex = ref(0)
 let videoName = ''
+let isFullScreen = false
 
 // 切换全屏模式
 const toggleFullscreen = async () => {
-  const isFullscreen = await appWindow.isFullscreen()
-  await appWindow.setFullscreen(!isFullscreen)
+  await appWindow.setFullscreen(!isFullScreen)
+  isFullScreen = !isFullScreen
+  if (!isFullScreen) {
+    clearTimeout(hideCursorTimer)
+  } else {
+    showCursor()
+  }
+}
+
+let hideCursorTimer = null
+// 鼠标移动时显示鼠标
+const showCursor = () => {
+  // 只在全屏模式下隐藏鼠标
+  if (!isFullScreen) return
+  invoke('set_cursor_visibility', { visible: true })
+  clearTimeout(hideCursorTimer)
+  hideCursorTimer = setTimeout(() => {
+    invoke('set_cursor_visibility', { visible: false })
+    clearTimeout(hideCursorTimer)
+  }, 2000)
 }
 
 let player = null
@@ -99,6 +119,19 @@ onMounted(async () => {
   await initPlayer()
 })
 
-onUnmounted(() => {})
+onUnmounted(() => {
+  player.destroy()
+  player = null
+  playUrl = ''
+  videoList.value = []
+  playIndex.value = 0
+  videoName = ''
+  clearTimeout(hideCursorTimer)
+  invoke('set_cursor_visibility', { visible: true })
+})
 </script>
-<style lang="less"></style>
+<style scoped>
+.hide-cursor {
+  cursor: none;
+}
+</style>
