@@ -87,6 +87,7 @@ const chooseEpisode = (item, index) => {
   playIndex.value = index
   const options = {
     url: playUrl,
+    autoplay: true,
   }
   player.changeVid(options)
   // 跳转到页面顶部
