@@ -90,6 +90,20 @@ const initPlayer = async () => {
   player.on('s2j_onNormalScreen', async () => {
     await toggleFullscreen()
   })
+
+  // 播放结束时播放下一集
+  player.on('s2j_onPlayOver', async () => {
+    if (playIndex.value < videoList.value.length - 1) {
+      const nextIndex = playIndex.value + 1
+      playUrl = videoList.value[nextIndex].url
+      playIndex.value = nextIndex
+      const options = {
+        url: playUrl,
+        autoplay: true,
+      }
+      player.changeVid(options)
+    }
+  })
 }
 
 const getVideoDetail = async () => {
