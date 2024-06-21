@@ -1,5 +1,8 @@
 import request from '../utils/request'
 import cheerio from 'cheerio'
+import config from '../config'
+
+const { RESOURCE_SERVER } = config
 
 /**
  * 获取类别
@@ -8,7 +11,7 @@ import cheerio from 'cheerio'
  * @returns
  */
 export const getCategory = async () => {
-  const html = await request.get('/getHtmlFromUrl?url=https://api.ffzyapi.com/')
+  const html = await request.get(`/getHtmlFromUrl?url=${RESOURCE_SERVER}`)
   const $ = cheerio.load(html)
 
   const navItems = $('.nav > .width1200 > ul > li').slice(1)

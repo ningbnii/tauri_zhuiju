@@ -1,5 +1,8 @@
 import request from '../utils/request'
 import cheerio from 'cheerio'
+import config from '../config'
+
+const { RESOURCE_SERVER } = config
 
 /**
  * 获取列表
@@ -8,7 +11,7 @@ import cheerio from 'cheerio'
  * @returns
  */
 export const getList = async (id, page = 1) => {
-  const html = await request.get(`/getHtmlFromUrl?url=https://api.ffzyapi.com/index.php/vod/type/id/${id}/page/${page}.html`)
+  const html = await request.get(`/getHtmlFromUrl?url=${RESOURCE_SERVER}index.php/vod/type/id/${id}/page/${page}.html`)
   const $ = cheerio.load(html)
   // 获取电影列表
   const movies = []
@@ -46,7 +49,7 @@ export const getList = async (id, page = 1) => {
  */
 export const getCover = async (url) => {
   // 刮削详情页，获取缩略图
-  const detailHtml = await request.get(`/getHtmlFromUrl?url=https://api.ffzyapi.com${url}`)
+  const detailHtml = await request.get(`/getHtmlFromUrl?url=${RESOURCE_SERVER}${url}`)
   const $detail = cheerio.load(detailHtml) // 使用 detailHtml.data 以获取响应内容
   const cover = $detail('.people img').attr('src')
   return cover
@@ -59,7 +62,7 @@ export const getCover = async (url) => {
  */
 export const getDetail = async (id) => {
   // 刮削详情页，获取缩略图
-  const detailHtml = await request.get(`/getHtmlFromUrl?url=https://api.ffzyapi.com/index.php/vod/detail/id/${id}.html`)
+  const detailHtml = await request.get(`/getHtmlFromUrl?url=${RESOURCE_SERVER}index.php/vod/detail/id/${id}.html`)
   const $ = cheerio.load(detailHtml) // 使用 detailHtml.data 以获取响应内容
   // 获取集数和对应的 ffm3u8 播放地址
   const episodes = []
@@ -85,7 +88,7 @@ export const getDetail = async (id) => {
  * @returns
  */
 export const searchMoviesByQuery = async (query, page = 1) => {
-  const html = await request.get(`/getHtmlFromUrl?url=https://api.ffzyapi.com/index.php/vod/search/page/${page}/wd/${query}.html`)
+  const html = await request.get(`/getHtmlFromUrl?url=${RESOURCE_SERVER}index.php/vod/search/page/${page}/wd/${query}.html`)
   const $ = cheerio.load(html)
   // 获取电影列表
   const movies = []
