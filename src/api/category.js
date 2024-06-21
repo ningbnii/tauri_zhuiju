@@ -8,7 +8,7 @@ import cheerio from 'cheerio'
  * @returns
  */
 export const getCategory = async () => {
-  const html = await request.get('/getHtmlFromUrl?url=http://ffzy5.tv/')
+  const html = await request.get('/getHtmlFromUrl?url=https://api.ffzyapi.com/')
   const $ = cheerio.load(html)
 
   const navItems = $('.nav > .width1200 > ul > li').slice(1)
