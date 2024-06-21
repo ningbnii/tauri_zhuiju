@@ -5214,18 +5214,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "zhuiju"
-version = "0.0.0"
-dependencies = [
- "cfg-if",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "winapi",
-]
-
-[[package]]
 name = "zvariant"
 version = "4.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5260,4 +5248,16 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 1.0.109",
+]
+
+[[package]]
+name = "追剧"
+version = "1.0.4"
+dependencies = [
+ "cfg-if",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "winapi",
 ]
