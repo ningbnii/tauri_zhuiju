@@ -1,7 +1,55 @@
-# Tauri + Vue 3
+# 追剧桌面应用介绍
 
-This template should help get you started developing with Tauri + Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+这是一个使用 **Tauri** 构建的桌面应用，是我学习 Tauri 的一个练手项目。由于我平时喜欢追剧，所以就想着做一个专门的追剧桌面应用。目前，项目的功能还在不断完善中，已经实现了基本的追剧功能，后续会继续添加更多功能。
 
-## Recommended IDE Setup
+项目特点：
 
-- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+- **使用 Tauri 构建**：轻量级、高性能的桌面应用框架。
+- **专为追剧设计**：方便用户快速找到和观看喜欢的剧集。
+- **持续更新**：项目功能不断完善，更多精彩功能即将上线。
+
+希望这个项目能为追剧爱好者提供一个便捷的工具，欢迎大家提供建议和反馈！
+
+## 技术栈
+
+项目使用的技术栈包括：
+
+- **Tauri**：用于构建桌面应用
+- **Vue**：用于构建用户界面
+- **TailwindCSS**：用于快速构建优雅的界面样式
+- **Vite**：用于快速开发和构建
+- **Go**：用于后端服务
+
+## 项目截图
+
+![项目预览](https://raw.githubusercontent.com/ningbnii/tauri_zhuiju/master/preview.png)
+
+## 项目运行
+
+要运行项目，请按照以下步骤操作：
+
+```bash
+# 安装依赖
+npm install
+
+# 运行开发环境
+npm run tauri dev
+```
+
+## 项目打包
+
+要打包项目，请使用以下命令：
+
+```bash
+npm run tauri build
+```
+
+## 贡献
+
+如果你有任何建议或改进，欢迎提交 Pull Request 或 Issue。感谢你的支持！
+
+---
+
+希望这个文档能帮助你更好地了解和使用这个追剧桌面应用。如果你有任何问题或需要进一步的帮助，请随时联系我。
+
+> **注意**：本项目仅供学习交流使用，不得用于商业用途和其他违法用途。项目中用到的视频资源均来自网络，如有侵权，请联系我删除。
