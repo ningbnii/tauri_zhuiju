@@ -12,7 +12,6 @@ const NETWORK_ERROR = '网络请求异常，请稍后重试'
 
 // 创建axios实例，添加全局配置
 const service = axios.create({
-  baseURL: config.baseUrl,
   timeout: 8000,
   headers: {
     'Content-Type': 'application/x-www-form-urlencoded;charset=utf8',
@@ -77,11 +76,12 @@ axiosRetry(service, {
  * @param {*} data 参数
  * @returns
  */
-function post(url, data) {
+function post(url, data, baseUrl = '') {
   return service({
     url,
     method: 'post',
     data: qs.stringify(data),
+    baseURL: baseUrl || config.baseUrl,
   })
 }
 
@@ -91,11 +91,12 @@ function post(url, data) {
  * @param {*} params 参数
  * @returns
  */
-function get(url, params) {
+function get(url, params, baseUrl = '') {
   return service({
     url,
     method: 'get',
     params,
+    baseURL: baseUrl || config.baseUrl,
   })
 }
 

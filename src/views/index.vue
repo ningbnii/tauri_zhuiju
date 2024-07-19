@@ -49,7 +49,7 @@
 import { onMounted, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { getCategory } from '@/api/category'
-import { getList, getCover, searchMoviesByQuery } from '@/api/video'
+import { getList, searchMoviesByQuery } from '@/api/video'
 import MyPagination from '@/components/MyPagination.vue'
 import { invoke } from '@tauri-apps/api/tauri'
 
@@ -85,10 +85,7 @@ const getVideoList = async () => {
 
   videoList.value = res.movies
   totalPages.value = res.totalPages
-  // 获取每个电影的封面
-  videoList.value.forEach(async (item) => {
-    item.cover = await getCover(item.url)
-  })
+
   // 跳转到页面顶部
   window.scrollTo(0, 0)
 }

@@ -1,6 +1,6 @@
 [package]
 name = "追剧"
-version = "1.0.4"
+version = "1.0.5"
 description = "追剧"
 authors = ["ningbnii"]
 edition = "2021"
@@ -16,6 +16,13 @@ winapi = { version = "0.3", features = ["winuser"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 cfg-if = "1"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
 
 
 [features]

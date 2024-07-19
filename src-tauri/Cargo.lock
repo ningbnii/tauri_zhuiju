@@ -5252,7 +5252,7 @@ dependencies = [
 
 [[package]]
 name = "追剧"
-version = "1.0.4"
+version = "1.0.5"
 dependencies = [
  "cfg-if",
  "serde",

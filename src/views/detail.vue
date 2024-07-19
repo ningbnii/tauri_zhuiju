@@ -8,7 +8,7 @@
       <div class="text-lg font-bold">剧集列表</div>
       <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-4 mt-2">
         <div v-for="(item, index) in videoList" :key="index" class="text-center">
-          <Button @click="chooseEpisode(item, index)" :class="playIndex === index ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'">
+          <Button @click="chooseEpisode(item, index)" :class="playIndex === index ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'" class="w-full min-w-[60px] truncate">
             {{ item.episode }}
           </Button>
         </div>
@@ -134,14 +134,16 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  player.destroy()
-  player = null
-  playUrl = ''
-  videoList.value = []
-  playIndex.value = 0
-  videoName = ''
-  clearTimeout(hideCursorTimer)
-  invoke('set_cursor_visibility', { visible: true })
+  try {
+    player.destroy()
+    player = null
+    playUrl = ''
+    videoList.value = []
+    playIndex.value = 0
+    videoName = ''
+    clearTimeout(hideCursorTimer)
+    invoke('set_cursor_visibility', { visible: true })
+  } catch (error) {}
 })
 </script>
 <style scoped>
